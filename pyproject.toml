@@ -1,0 +1,60 @@
+[project]
+name = "job-scheduler"
+version = "0.1.0"
+description = "A durable, horizontally-scalable webhook job scheduler coordinated entirely through Postgres."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "asyncpg>=0.29",
+    "croniter>=3.0",
+    "httpx>=0.27",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+    "mypy>=1.10",
+    "types-croniter",
+]
+
+[project.scripts]
+scheduler = "scheduler.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["scheduler*"]
+
+[tool.setuptools.package-data]
+scheduler = ["db/migrations/*.sql"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "db: requires a live Postgres (TEST_DATABASE_URL)",
+    "chaos: kills real worker processes; slower than the rest of the suite",
+]
+
+[tool.mypy]
+files = ["scheduler"]
+disallow_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"migrations/versions/*" = ["E501", "I001", "UP"]
